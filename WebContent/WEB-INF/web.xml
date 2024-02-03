@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:web="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<!--NOTE:All the servlets routing is done through @WebServlet annotations 
+		in the respective servlet file -->
+
+	<!-- Error Handlers -->
+	<servlet>
+		<servlet-name>ErrorHandlerServlet</servlet-name>
+		<servlet-class>com.shashi.servlets.ErrorHandlerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ErrorHandlerServlet</servlet-name>
+		<url-pattern>/error</url-pattern>
+	</servlet-mapping>
+	<!-- error-code related error pages -->
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error</location>
+	</error-page>
+	<error-page>
+		<error-code>405</error-code>
+		<location>/error</location>
+	</error-page>
+
+	<!-- exception-type related error pages -->
+	<error-page>
+		<exception-type>
+			javax.servlet.ServletException
+		</exception-type>
+		<location>/error</location>
+	</error-page>
+	<!-- exception-type related all errors -->
+	<error-page>
+		<exception-type>java.lang.Throwable</exception-type>
+		<location>/error</location>
+	</error-page>
+
+	<welcome-file-list>
+		<welcome-file>UserLogin.html</welcome-file>
+	</welcome-file-list>
+</web-app>
