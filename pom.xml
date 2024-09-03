@@ -53,8 +53,6 @@
 					</execution>
 				</executions>
 			</plugin>			
-#By ASecurityGuru
--->
     <plugin>
       <groupId>io.snyk</groupId>
       <artifactId>snyk-maven-plugin</artifactId>
@@ -64,7 +62,6 @@
         <org>Venn1991</org>
       </configuration>
     </plugin>
-<!-- Snyk Changes for SCA Ends Here -->
 		</plugins>
 	</build>
 	<dependencies>
