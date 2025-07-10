@@ -5,17 +5,17 @@ on:
 jobs:
  build:
     runs-on:ubuntu-latest
-    steps:
-  - uses: actions/checkout@v3
-  - name: Set up JDK 11
-    uses: actions/setup-java@v2
-     with:
-      distribution: 'adopt'
-      java-version: '11'
-   - name: Build with maven 
-     run: mvn clean install -f pom.xml 
-   - name: Deploy to Tomcat
-     run: curl -v -u ${{secrets.TOMCAT_USER}}.${{secrets.TOMCAT_PASSWORD}}\ -T MyWebapp/target/TrainBook-1.0.0-SNAPSHOT.war\
+ steps:
+     - uses: actions/checkout@v3
+     - name: Set up JDK 11
+       uses: actions/setup-java@v2
+       with:
+        distribution: 'adopt'
+        java-version: '11'
+     - name: Build with maven 
+       run: mvn clean install -f pom.xml 
+     - name: Deploy to Tomcat
+       run: curl -v -u ${{secrets.TOMCAT_USER}}.${{secrets.TOMCAT_PASSWORD}}\ -T MyWebapp/target/TrainBook-1.0.0-SNAPSHOT.war\
         "http://${{secrets.TOMCAT_HOST}}/manager/text/deploy?path=MYWebApp&update=true"
     
           
