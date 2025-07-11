@@ -1,7 +1,7 @@
 name: Build a WAR file using Maven and Deploy Java App to Tomcat running in AWS EC2
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 jobs:
   build:
     runs-on: ubuntu-latest
