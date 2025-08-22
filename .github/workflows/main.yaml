@@ -33,6 +33,6 @@ jobs:
       
     - name: deploy to tomcat
       run: curl -v --fail -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-        -T target/ \
+        -T target/TrainBook-1.0.0-SNAPSHOT.war\
         "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/train-ticket-reservation&update=true"
 
