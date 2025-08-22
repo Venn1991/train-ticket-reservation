@@ -29,7 +29,14 @@ jobs:
       run: mvn test
 
     - name: Run package
-      run:  mvn package
+      run:  mvn package 
       
-   ## - name: deploy to tomcat  
+    - name: deploy to tomcat
+      run: curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+        -T train-ticket-reservation/target/ TrainBook.1.0.0-SNAPSHOT.war \
+        "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/ train-ticket-reservation&update=true"
+
+   
+   
+   
 
