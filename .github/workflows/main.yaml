@@ -13,7 +13,7 @@ jobs:
         distribution: 'adopt'
         java-version: '11'
     - name: Build with Maven
-      run: mvn clean install train-ticket-reservation
+      run: mvn clean package train-ticket-reservation
     - name: Deploy to Tomcat
       run: |
         curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
