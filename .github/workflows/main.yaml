@@ -22,9 +22,8 @@ jobs:
       with:
         projectBaseDir: .
         args: >
-          -Dsonar.organization=my-madhu
-          -Dsonar.projectKey=train-ticket-reservation
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+         mvn clean verify sonar:sonar \
+          -Dsonar.projectKey= train-ticket-reservation \
+          -Dsonar.host.url=http://ec2-3-15-145-202.us-east-2.compute.amazonaws.com:9000/ 
+         -Dsonar.login=$squ_3eb24339a27cbdd1fe3599a7b2f921a657858a11
 
