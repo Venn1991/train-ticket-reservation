@@ -27,9 +27,10 @@ jobs:
         #Deploy WAR to Tomcat  
         - name: Deploy to tomcat
           run: |
-           curl -v -u ***:*** \
+           curl -v -u ${{secrets.TOMCAT_USER}}:${{secrets.TOMCAT_PASSWORD}} \
            -T target/TrainBook-1.0.0-SNAPSHOT.war \
-            "http://***/manager/text/deploy?path=/TrainBook-1.0.0-SNAPSHOT&update=true"
+           "http://${{secrets.TOMCAT_HOST}}/manager/text/deploy?path=train-ticket-reservation&update=true"
+          
 
         
    
