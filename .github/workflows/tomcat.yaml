@@ -22,7 +22,14 @@ jobs:
             
         #Build with  maven(update)
         - name: Build with maven
-          run: maven clean package  
+          run: mvn clean package
+          
+        #Deploy WAR to Tomcat  
+        - name: Deploy to tomcat
+          run: |
+            curl -v -u ${{secrets.TOMCAT_USER}}:${{SECRETS.TOMCAT_PASSWORD}} \
+            -T target//TrainBook-1.0.0-SNAPSHOT.war\
+            "http://${{secrets.TOMCAT_HOST}}/manager/text/deploy?path=/TrainBook-1.0.0-SNAPSHOT.war&update=true"
          
         
    
