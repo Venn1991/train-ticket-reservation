@@ -20,17 +20,21 @@ jobs:
             distribution: 'temurin'
             java-version:  '11'
             
-        #Build with  maven(update)
-        - name: Build with maven
-          run: mvn clean package
+        #validate with  maven(update)
+        - name: validate the code
+          run: mvn validate
           
-        #Deploy WAR to Tomcat  
-        - name: Deploy to tomcat
-          run: |
-           - name: Deploy WAR to Tomcat
-             run: |
-               curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-                -T target/TrainBook-1.0.0-SNAPSHOT.war "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/TrainBook-1.0.0-SNAPSHOT&update=true"
-
+        #compile with  maven(update)
+        - name: compile the code
+          run: mvn compile
+          
+         #test with  maven(update)
+        - name: test the code
+          run: mvn test
+          
+          #package with  maven(update)
+        - name: package the code
+          run: mvn package
+        
         
    
