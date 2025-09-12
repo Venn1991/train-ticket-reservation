@@ -44,4 +44,4 @@ jobs:
         - name: check the tomcat connection
           run: |
                curl --fail --anyauth -u "${{secrets.TOMCAT_USER}}:${{secrets.TOMCAT_PASSWORD}}"\
-               "https://{secrets.TOMCAT_HOST}}/manager/text/list"
+               "http://{secrets.TOMCAT_HOST}}/manager/text/list"
