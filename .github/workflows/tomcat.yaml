@@ -36,5 +36,6 @@ jobs:
         - name: package the code
           run: mvn package
         
-        
-   
+          #verify the war file
+        - name: verify 
+          run: ls -l target/   
