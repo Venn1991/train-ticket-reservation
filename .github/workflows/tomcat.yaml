@@ -39,3 +39,9 @@ jobs:
           #verify the war file
         - name: verify 
           run: ls -l target/   
+
+         #check the connection
+        - name: check the tomcat connection
+          run: |
+               curl --fail --anyauth -u "${{secrets.TOMCAT_USER}}:${{secrets.TOMCAT_PASSWORD}}"\
+               "https://{secrets.TOMCAT_HOST}}/manager/text/list"
