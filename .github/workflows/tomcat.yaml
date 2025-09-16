@@ -43,11 +43,13 @@ jobs:
           # verify the sonar
         - name: SonarQube Scan
           uses: SonarSource/sonarqube-scan-action@master # Ex: v4.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+          with:
+           projectBaseDir: .
+           args: >
+            -Dsonar.organization=my-org
+            -Dsonar.projectKey=my-Java-web-app
+
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-                
-
-             
-
-       
+                     
