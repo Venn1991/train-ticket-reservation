@@ -1,55 +1,40 @@
-name:  ci pipeline for code quality (sonarqube)
+name: SonarQube Analysis
 
 on:
   push:
-     branches:
-       - master  # Runs pipeline onlu when pushing to master branch
+    branches: 
+    - master
+ 
 jobs:
-   build-deploy:
-      runs-on: ubuntu-latest
+  sonarqube:
+    runs-on: ubuntu-latest
 
-      steps:
-        # Checkout repo
-        - name: Checkout code 
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        # Set up java 
-        - name: set up jdk 11
-          uses: actions/setup-java@v3
-          with: 
-            distribution: 'temurin'
-            java-version:  '11'
-            
-        #validate with  maven(update)
-        - name: validate the code
-          run: mvn validate
-          
-        #compile with  maven(update)
-        - name: compile the code
-          run: mvn compile
-          
-         #test with  maven(update)
-        - name: test the code
-          run: mvn test
-          
-          #package with  maven(update)
-        - name: package the code
-          run: mvn package
-        
-          #verify the war file
-        - name: verify 
-          run: ls -l target/   
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-          # verify the sonar
-        - name: SonarQube Scan
-          uses: SonarSource/sonarqube-scan-action@master # Ex: v4.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
-          with:
-           projectBaseDir: .
-           args: >
-            -Dsonar.organization=my-org
-            -Dsonar.projectKey=my-Java-web-app
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-                     
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./maven sonarqube \
+            -Dsonar.projectKey=train-ticket-reservation \
+            -Dsonar.host.url=http://18.144.74.114:9000 \
+            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.login=$SONAR_TOKENdlew sonarqube \
+            -Dsonar.projectKey=<your_project_key> \
+            -Dsonar.host.url=<your_sonarqube_url> \
+            -Dsonar.login=$SONAR_TOKEN
