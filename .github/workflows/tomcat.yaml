@@ -30,11 +30,8 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./maven sonarqube \
+           sonarqube \
             -Dsonar.projectKey=train-ticket-reservation \
             -Dsonar.host.url=http://18.144.74.114:9000 \
             -Dsonar.login=$SONAR_TOKEN
-            -Dsonar.login=$SONAR_TOKENdlew sonarqube \
-            -Dsonar.projectKey=<your_project_key> \
-            -Dsonar.host.url=<your_sonarqube_url> \
-            -Dsonar.login=$SONAR_TOKEN
+            
