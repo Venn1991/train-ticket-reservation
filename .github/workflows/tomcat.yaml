@@ -1,4 +1,4 @@
-name:  ci/cd pipeline to deploy to tomcat
+name:  ci pipeline for code quality (sonarqube)
 
 on:
   push:
@@ -40,9 +40,4 @@ jobs:
         - name: verify 
           run: ls -l target/   
 
-         #Deploy to tomcat
-        - name: Deploy to tomcat
-          run: |
-                 curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-                  -T target/TrainBook-1.0.0-SNAPSHOT.war \
-                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+       
