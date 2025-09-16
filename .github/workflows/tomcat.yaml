@@ -40,4 +40,18 @@ jobs:
         - name: verify 
           run: ls -l target/   
 
+          # verify the sonar
+        -  name: SonarQube Scan
+           uses: SonarSource/sonarqube-scan-action@master
+           with:
+             projectBaseDir: .
+              args:>
+              -Dsonar.organization=train-ticket
+              -Dsonar.projectKey=train-ticker-reservation
+             env:  
+                SONAR_TOKEN:${{secrets.SONAR_TOKEN }}
+                 SONAR_HOST_URL:${{secrets.SONAR_HOST_URL }}
+
+             
+
        
