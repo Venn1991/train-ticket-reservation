@@ -33,7 +33,14 @@ jobs:
 
       - name: verify WAR file
         run: ls -lh target/
-         
+
+      - name: sonarqube code quality
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=train-ticket-reservation \
+            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+
 
      
          
