@@ -14,6 +14,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'   # Updated Java version
+          server-id: nexus
+          server-username: NEXUS_USERNAME
+          server-password: NEXUS_PASSWORD
+          settings-path: ${{ github.workspace }}
       - name: validate with maven
         run: mvn validate
       - name: compile with maven
@@ -23,7 +27,11 @@ jobs:
       - name: package with maven
         run: mvn package
         # Store artifact to nexus
-  
+      - name: Deploy to Nexus
+        run: mvn deploy -DskipTests --settings ${{ github.workspace }}/settings.xml
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
        
         
           
