@@ -14,10 +14,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'   # Updated Java version
-          server-id: nexus
-          server-username: NEXUS_USERNAME
-          server-password: NEXUS_PASSWORD
-          settings-path: ${{ github.workspace }}
       - name: validate with maven
         run: mvn validate
       - name: compile with maven
@@ -28,11 +24,26 @@ jobs:
         run: mvn package
         # Store artifact to nexus
       - name: Deploy to Nexus
-        run: mvn deploy -DskipTests --settings ${{ github.workspace }}/settings.xml
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-       
+        publish-to-nexus:
+        needs: build-and-scan
+        runs-on: ubuntu-latest
+         steps:
+        - uses: actions/download-artifact@v4
+          with:
+          name: app-war
+          path: target
+      - run: |
+          VERSION=1.0.${{ github.run_number }}
+          mvn deploy:deploy-file \
+            -Durl=${{ secrets.NEXUS_URL }} \
+            -DrepositoryId=nexus \
+            -Dfile=target/*.war \
+            -DgroupId=TrainBook \
+            -DartifactId=TrainBook \
+            -Dversion=$VERSION \
+            -Dpackaging=war \
+            -DgeneratePom=true
+
         
           
   
