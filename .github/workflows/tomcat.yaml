@@ -25,3 +25,10 @@ jobs:
       #       -Dsonar.projectKey=vcube139 \
       #       -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
       #       -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+
+
+      - name: deploy to tomcat server
+        run: |
+                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \ 
+                -T target/TrainBook-1.0.0-SNAPSHOT.war \
+                "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text"
