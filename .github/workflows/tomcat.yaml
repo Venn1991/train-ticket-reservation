@@ -14,7 +14,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'   # Updated Java version
-      - name: validate with maven
+      - name: validate and package with maven
         run: mvn clean package
       - name: verify WAR file
         run: ls -lh target/
