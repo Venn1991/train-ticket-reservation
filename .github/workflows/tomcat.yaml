@@ -1,4 +1,4 @@
-name: ci/cd pipeline to deploy to tomcat
+name: ci/cd pipeline to deploy to java application on tomcat
 on: 
   push:
     branches: master
@@ -15,13 +15,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'   # Updated Java version
       - name: validate with maven
-        run: mvn validate
-      - name: compile with maven
-        run: mvn compile
-      - name: test with maven
-        run: mvn test
-      - name: package with maven
-        run: mvn package
+        run: mvn clean package
       - name: verify WAR file
         run: ls -lh target/
       
