@@ -18,6 +18,11 @@ jobs:
         run: mvn clean package
       - name: verify WAR file
         run: ls -lh target/
+      - name: deploy to tomcat server
+        run: |
+              curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+              -T target/TrainBook-1.0.0-SNAPSHOT.war \
+              "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/kp&update=true"
       
       # - name: Build, Test and SonarQube Scan
       #   run: |
@@ -27,8 +32,8 @@ jobs:
       #       -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
 
 
-      - name: deploy to tomcat server
-        run: |
-                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \ 
-                -T target/TrainBook-1.0.0-SNAPSHOT.war \
-                "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/kp&update=true"
+      # - name: deploy to tomcat server
+      #   run: |
+      #           curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \ 
+      #           -T target/TrainBook-1.0.0-SNAPSHOT.war \
+      #           "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/kp&update=true"
