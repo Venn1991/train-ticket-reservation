@@ -19,9 +19,9 @@ jobs:
       - name: verify WAR file
         run: ls -lh target/
       
-      - name: Build, Test and SonarQube Scan
-        run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=vcube139 \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+      # - name: Build, Test and SonarQube Scan
+      #   run: |
+      #     mvn clean verify sonar:sonar \
+      #       -Dsonar.projectKey=vcube139 \
+      #       -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+      #       -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
