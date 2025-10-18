@@ -1,33 +1,36 @@
-name: ci/cd pipeline to deploy to tomcat
-on: 
+name: Deploying Java application on tomcat using Maven
+
+on:
   push:
     branches: master
+  pull_request:
+    branches: master
+
 jobs:
-  build-deploy:
+  Build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
+      - name: CODE CHECKOUT
         uses: actions/checkout@v3
-      
-      - name: set-up jdk
+
+      #Java setup
+      - name: Install Java package
         uses: actions/setup-java@v3
         with:
+          java-version: '17'
           distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      - name: validate with maven
-        run: mvn validate
-      - name: compile with maven
-        run: mvn compile
-      - name: test with maven
-        run: mvn test
-      - name: package with maven
-        run: mvn package
-      - name: verify WAR file
-        run: ls -lh target/
       
-      - name: Build, Test and SonarQube Scan
-        run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=vcube139 \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+      # Maven Starts
+      - name: CODE VALIDATION
+        run: mvn validate
+      - name: CODE COMPILATION
+        run: mvn compile
+      - name: CODE TESTING
+        run: mvn test
+      - name: CODE PACKAGNG
+        run: mvn package
+
+      # Verifying WAR file
+      - name: Verifying WAR file
+        run: ls -lh target/
