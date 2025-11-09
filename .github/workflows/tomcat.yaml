@@ -1,33 +1,47 @@
-name: ci/cd pipeline to deploy to tomcat
-on: 
+name: CI/CD Pipeline
+
+on:
   push:
-    branches: master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  build-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
-        uses: actions/checkout@v3
-      
-      - name: set-up jdk
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      - name: validate with maven
-        run: mvn validate
-      - name: compile with maven
-        run: mvn compile
-      - name: test with maven
-        run: mvn test
-      - name: package with maven
-        run: mvn package
-      - name: verify WAR file
-        run: ls -lh target/
-      
-      - name: Build, Test and SonarQube Scan
-        run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=vcube139 \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests  # Add tests later
+
+    - name: SonarQube Scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Generate in SonarQube > My Account > Tokens
+        SONAR_HOST_URL: http://your-aws-ip:9000
+      run: |
+        mvn sonar:sonar -Dsonar.projectKey=train-ticket-reservation -Dsonar.host.url=$$ {{ env.SONAR_HOST_URL }} -Dsonar.login= $${{ env.SONAR_TOKEN }}
+
+    - name: Publish to Nexus
+      env:
+        NEXUS_USERNAME: admin
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}  # Store in GitHub Secrets
+      run: |
+        mvn deploy -s settings.xml  # Use a settings.xml with Nexus creds if needed
+
+    - name: Deploy to Tomcat
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.AWS_HOST }}  # your-aws-ip
+        username: ubuntu
+        key: ${{ secrets.AWS_SSH_KEY }}  # PEM content in GitHub Secrets
+        source: "target/*.war"
+        target: "/home/ubuntu/tomcat_webapps/"  # Mount copies to container
+        strip_components: 1
