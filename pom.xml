@@ -17,8 +17,8 @@
 
     <properties>
         <java.version>17</java.version>  <!-- Use Java 17+ -->
-        <sonar.host.url>http://your-aws-ip:9000</sonar.host.url>  <!-- Update with AWS SonarQube URL -->
-        <nexus.url>http://your-aws-ip:8081</nexus.url>
+        <sonar.host.url>http://44.203.139.230:9000</sonar.host.url>  <!-- Update with AWS SonarQube URL -->
+        <nexus.url>http://44.203.139.230:8081</nexus.url>
     </properties>
 
     <dependencies>
