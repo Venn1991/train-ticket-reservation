@@ -20,28 +20,28 @@ jobs:
         distribution: 'temurin'
 
     - name: Build with Maven
-      run: mvn clean package -DskipTests  # Add tests later
+      run: mvn clean package -DskipTests
 
     - name: SonarQube Scan
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Generate in SonarQube > My Account > Tokens
-        SONAR_HOST_URL: http://your-aws-ip:9000
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: http://54.82.193.130:9000  # Your IP
       run: |
         mvn sonar:sonar -Dsonar.projectKey=train-ticket-reservation -Dsonar.host.url=$$ {{ env.SONAR_HOST_URL }} -Dsonar.login= $${{ env.SONAR_TOKEN }}
 
     - name: Publish to Nexus
       env:
         NEXUS_USERNAME: admin
-        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}  # Store in GitHub Secrets
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       run: |
-        mvn deploy -s settings.xml  # Use a settings.xml with Nexus creds if needed
+        mvn deploy -s settings.xml  # Assumes settings.xml with creds; or use -DaltDeploymentRepository
 
     - name: Deploy to Tomcat
       uses: appleboy/scp-action@v0.1.4
       with:
-        host: ${{ secrets.AWS_HOST }}  # your-aws-ip
+        host: 54.82.193.130  # Your IP
         username: ubuntu
-        key: ${{ secrets.AWS_SSH_KEY }}  # PEM content in GitHub Secrets
+        key: ${{ secrets.AWS_SSH_KEY }}
         source: "target/*.war"
-        target: "/home/ubuntu/tomcat_webapps/"  # Mount copies to container
+        target: "/home/ubuntu/tomcat_webapps/"
         strip_components: 1
