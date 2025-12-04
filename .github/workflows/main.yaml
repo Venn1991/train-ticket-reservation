@@ -1,1 +1,27 @@
-
+name: ci/cd pipeline to deploy to tomcat
+on: 
+  push:
+    branches: master
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+      
+      - name: set-up jdk
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'   # Updated Java version
+      - name: validate with maven
+        run: mvn validate
+      - name: compile with maven
+        run: mvn compile
+      - name: test with maven
+        run: mvn test
+      - name: package with maven
+        run: mvn package
+          
+     
+     
