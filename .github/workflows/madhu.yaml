@@ -1,1 +1,11 @@
+name: maven bild 
+on:
+ push:
+  branches:
+   - master
+    
+   
+  
+  
+ 
 
