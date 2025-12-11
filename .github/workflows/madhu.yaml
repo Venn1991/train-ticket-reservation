@@ -22,7 +22,7 @@ jobs:
       - name: maven package
         run: mvn package
       - name: varify war file
-        run: ls -lh /target
+        run: ls -lh target/
         
       
  
