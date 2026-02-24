@@ -26,3 +26,6 @@ jobs:
       
       - name: package with maven
         run: mvn clean package
+
+      - name: verify WAR file
+        run: ls -lh target/
