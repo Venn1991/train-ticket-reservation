@@ -29,3 +29,10 @@ jobs:
 
       - name: verify WAR file
         run: ls -lh target/
+        
+      - name: SonarQube Scan
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=train-reservation \
+            -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
