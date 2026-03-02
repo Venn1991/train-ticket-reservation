@@ -22,7 +22,7 @@ jobs:
         run: mvn compile
       
       - name: test with maven
-         run: mvn test
+        run: mvn test
       
       - name: package with maven
         run: mvn clean package
