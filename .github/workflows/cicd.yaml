@@ -29,3 +29,10 @@ jobs:
 
       - name: verify WAR file
         run: ls -lh target/
+        
+      - name: Sonar scan 
+        run: |
+           mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=train-ticket-reservation \
+            -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
