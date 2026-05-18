@@ -13,16 +13,13 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      
-      - name: validate with maven
-        run: mvn validate
-
-      - name: compile with maven
-        run: mvn compile
-      
-      - name: test with maven
+          java-version: '17'   # Updated Java versio
+      - name: maven validate
         run: mvn test
-      
-      - name: package with maven
-        run: mvn clean package
+      - name: maven compile
+        run: mvn compile 
+      - name: maven test
+        run: mvn test
+      - name: maven package
+        run: mvn package
+ 
