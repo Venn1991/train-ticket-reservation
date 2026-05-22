@@ -15,14 +15,30 @@ jobs:
           distribution: 'temurin'
           java-version: '17'   # Updated Java versio
       - name: maven validate
-        run: mvn test
+        run: mvn validate
       - name: maven compile
         run: mvn compile 
       - name: maven test
         run: mvn test
       - name: maven package
         run: mvn package
-        # deploye to tomcat
+      - name: Configure Maven settings.xml for Nexus
+        run: |
+          mkdir -p ~/.m2
+          cat <<EOF > ~/.m2/settings.xml
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Upload Artifact to Nexus
+        run: mvn deploy -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_URL }}
      
        
  
