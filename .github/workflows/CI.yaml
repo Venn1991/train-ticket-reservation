@@ -26,10 +26,7 @@ jobs:
       run: mvn package 
     - name: verify WAR file 
       run: ls -lh target/ 
-    - name: check the tomcat connection
-      run: |
-             curl --fail -u "${{ secrets.TOMCAT_USER}}:${{ secrets.TOMCAT_PASSWORD }}" \
-             "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
+
     # Deploy to tomcat
     - name: deploy war to tomcat 
       run: | 
