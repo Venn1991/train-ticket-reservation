@@ -26,13 +26,14 @@ jobs:
       run: mvn package 
     - name: verify WAR file 
       run: ls -lh target/ 
-
-    # Deploy to Tomcat
-    - name: deploy war to tomcat
-      run: | 
-                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-                  -T target/TrainBook-1.0.0-SNAPSHOT.war \
-                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+      
+      # sonarqube code quality 
+    - name: Build and test and sonarscan 
+      run: |
+       mvn clean verify sonar:sonar \
+        -Dsonar.projectkey=train-ticket-reservation \
+        -Dsonar.host.url="${{secrets.SONAR_HOST_URL }}" \
+        -Dsonar.login="${{secrets.SONAR_TOKEN }}"
         
 
     
