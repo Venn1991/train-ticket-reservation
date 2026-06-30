@@ -27,13 +27,22 @@ jobs:
     - name: verify WAR file 
       run: ls -lh target/ 
       
-      # sonarqube code quality 
-    - name: Build and test and sonarscan 
+    - name: Configure Maven settings.xml for Nexus
       run: |
-       mvn clean verify sonar:sonar \
-        -Dsonar.projectkey=train-ticket-reservation \
-        -Dsonar.host.url="${{secrets.SONAR_HOST_URL }}" \
-        -Dsonar.login="${{secrets.SONAR_TOKEN }}"
-        
+          mkdir -p ~/.m2
+          cat <<EOF > ~/.m2/settings.xml
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+    - name: Upload Artifact to Nexus
+      run: mvn deploy -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_REPO_URL }}
 
     
