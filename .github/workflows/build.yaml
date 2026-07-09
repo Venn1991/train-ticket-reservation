@@ -1,4 +1,4 @@
-name: Build and Deploy train-ticket-reservation
+name: CI/CD PIPELINE TO BULD AND DEPLOY TO TOMCAT
 
 on:
   push:
@@ -30,6 +30,14 @@ jobs:
         run:  mvn package
       - name: verify war file
         run: ls -lh target/ 
+        
+       # Deploy to tomcat
+      - name: deploy war to tomcat
+        run: |
+               curl -v -u "${{secrets.TOMCAT_USER}}:${{secrets.TOMCAT_PASSWORD }}" \
+               -T target/TrainBook-1.0.0-SNAPSHOT.war \
+               "http://${{secrets.TOMCAT_HOST}}:8080/manager/text/deploy?path=/TrainBook&update=true"
+               
         
          
       
