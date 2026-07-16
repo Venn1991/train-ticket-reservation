@@ -30,22 +30,6 @@ jobs:
       - name: Verify WAR
         run: ls -lh target
 
-      # Java 17 only for SonarQube
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: SonarQube Scan
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=train-ticket \
-            -Dsonar.projectName=train-ticket \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.token=$SONAR_TOKEN
+ 
 
   
