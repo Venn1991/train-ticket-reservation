@@ -11,7 +11,7 @@ jobs:
       - name: set-up jdk 
         uses: actions/setup-java@v5
         with:
-           distribution: "termuin"
+           distributions: "termuin"
            java-version:  '17'
       - name: validate with maven
         run: mvn validate
