@@ -9,7 +9,7 @@ jobs:
       - name: checkout code 
         uses: actions/checkout@v3
       - name: set-up jdk 
-        uses: action/setup-java@v3
+        uses: actions/setup-java@v3
         with:
            distribution: "termuin"
            java-version:  '17'
