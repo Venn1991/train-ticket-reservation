@@ -1,4 +1,4 @@
-name: ci pipeline to build maven
+name: ci/cd pipeline to deploy artifact into tomcat
 on:
   push:
     branches: master
@@ -27,6 +27,8 @@ jobs:
 
       - name: verfiy the war file
         run: ls -lh target/
+
+    
         
         
         
