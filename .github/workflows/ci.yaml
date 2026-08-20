@@ -28,7 +28,7 @@ jobs:
       - name: verfiy the war file
         run: ls -lh target/
         
-      - name: Buld, Test and sonarqube Scan
+      - name: Build Test and sonarqube Scan
         run: |
           mvn clean verify sonar:sonar \
             -Dsonar.projectKey=train-ticket-reservation \
