@@ -31,7 +31,7 @@ jobs:
       - name: Build Test and sonarqube Scan
         env:
            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST: ${{ secrets.SONAR_HOST }}
           run: |
             -Dsonar.projectKey=train \
             -Dsonar.projectName=TrainBook \
