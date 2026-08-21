@@ -32,8 +32,8 @@ jobs:
            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
            SONAR_HOST: ${{ secrets.SONAR_HOST }}
         run: |
+            mvn clean verify:verify \
             -Dsonar.projectKey=train \
-            -Dsonar.projectName=TrainBook \
             -Dsonar.host.url="$SONAR_HOST" \
             -Dsonar.token="$SONAR_TOKEN"
           
