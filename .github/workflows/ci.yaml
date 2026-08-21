@@ -53,7 +53,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
+          mvn clear verfiy:verify \
             -Dsonar.projectKey=train \
             -Dsonar.projectName=TrainBook \
             -Dsonar.host.url="$SONAR_HOST_URL" \
