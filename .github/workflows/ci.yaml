@@ -27,12 +27,11 @@ jobs:
 
       - name: verfiy the war file
         run: ls -lh target/
-        
       - name: Build Test and sonarqube Scan
         env:
            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST: ${{ secrets.SONAR_HOST }}
-          run: |
+           SONAR_HOST: ${{ secrets.SONAR_HOST }}
+        run: |
             -Dsonar.projectKey=train \
             -Dsonar.projectName=TrainBook \
             -Dsonar.host.url="$SONAR_HOST" \
