@@ -14,4 +14,11 @@
       <mirrorOf>*</mirrorOf>
     </mirror>
   </mirrors>
+  <servers>
+    <server>
+      <id>sonar-token</id>
+      <username></username>
+      <password>sqp_ccc7ba7f83666b14bd1c924a4114106ff0bf3df7</password>
+    </server>
+  </servers>
 </settings>
