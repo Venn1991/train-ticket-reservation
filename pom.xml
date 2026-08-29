@@ -5,6 +5,7 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<build>
+		//firstcommit
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
 			<resource>
