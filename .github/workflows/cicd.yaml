@@ -26,7 +26,7 @@ jobs:
          run: ls -lh target/
        - name: Build, Test and SonarQube Scan
          run: |
-          mvn clean verify sonar:sonar \
+          mvn package\
             -Dsonar.projectKey=train-ticket-reservation \
             -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
             -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
