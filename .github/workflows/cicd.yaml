@@ -33,7 +33,7 @@ jobs:
 
       # Configure Maven Settings
        - name: Configure Maven settings.xml
-        run: |
+         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml <<EOF
           <settings>
