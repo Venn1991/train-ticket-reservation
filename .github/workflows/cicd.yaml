@@ -1,54 +1,60 @@
-name: ci/cd pipeline to deploy to tomcat
-on:
-   push:
-      branches: master
-jobs:
-   build-deploy:
-     runs-on: ubuntu-latest
-     steps:
-       - name: checkout code
-         uses: actions/checkout@v5
-       - name: set-up jdk
-         uses: actions/setup-java@v5
-         with:
-           distribution: 'temurin'
-           java-version: '17'
-           
-       - name: validate with maven  
-         run: mvn validate
-       - name: compile with maven  
-         run: mvn compile 
-       - name: test with maven  
-         run: mvn test
-       - name: package with maven  
-         run: mvn package
-       - name: verify war file  
-         run: ls -lh target/
-      # Switch back to Java 8
-       - name: Setup Java 8 Again
-         uses: actions/setup-java@v5
-         with:
-          distribution: temurin
-          java-version: '8'
+name: CI/CD Pipeline with SonarQube
 
-      # Configure Maven Settings
-       - name: Configure Maven settings.xml
-         run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<EOF
-          <settings>
-            <servers>
-              <server>
-                <id>nexus</id>
-                <username>${{ secrets.NEXUS_USERNAME }}</username>
-                <password>${{ secrets.NEXUS_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-    # Deploy to Nexus
-       - name: Deploy Artifact to Nexus
-         run: |
-           mvn deploy \
-            -DskipTests \
-            -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_REPO_URL }}      
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # 1. Checkout Source Code
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+
+      # 2. Setup Java 17
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+
+      # 3. Validate
+      - name: Validate
+        run: mvn validate
+
+
+      # 4. Compile
+      - name: Compile
+        run: mvn compile
+
+
+      # 5. Test
+      - name: Test
+        run: mvn test
+
+
+      # 6. Package
+      - name: Package
+        run: mvn package
+
+
+      # 7. SonarQube Scan
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
+            -Dsonar.projectKey=train \
+            -Dsonar.projectName=TrainBook \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.token="$SONAR_TOKEN"
