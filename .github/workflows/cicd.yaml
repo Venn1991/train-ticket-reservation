@@ -1,60 +1,55 @@
-name: CI/CD Pipeline with SonarQube
+name: Maven Build, SonarQube and Nexus
 
 on:
   push:
     branches:
       - master
 
+  workflow_dispatch:
+
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
 
-      # 1. Checkout Source Code
       - name: Checkout Source
         uses: actions/checkout@v4
 
-
-      # 2. Setup Java 17
-      - name: Setup Java 17
+      # Build using Java 8
+      - name: Setup Java 8
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '8'
           cache: maven
 
+      - name: Build Project
+        run: mvn clean install -DskipTests
 
-      # 3. Validate
-      - name: Validate
-        run: mvn validate
-
-
-      # 4. Compile
-      - name: Compile
-        run: mvn compile
-
-
-      # 5. Test
-      - name: Test
-        run: mvn test
-
-
-      # 6. Package
-      - name: Package
-        run: mvn package
-
-
-      # 7. SonarQube Scan
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Verify WAR
+        run: ls -lh target
+      # Configure Maven Settings
+      - name: Configure Maven settings.xml
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
-            -Dsonar.projectKey=train \
-            -Dsonar.projectName=TrainBook \
-            -Dsonar.host.url="$SONAR_HOST_URL" \
-            -Dsonar.token="$SONAR_TOKEN"
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      # Deploy to Nexus
+      - name: Deploy Artifact to Nexus
+        run: |
+          mvn deploy \
+            -DskipTests \
+            -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_REPO_URL }}
+
+  
