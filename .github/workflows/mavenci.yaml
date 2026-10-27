@@ -1,4 +1,4 @@
-name: ci pipeline to build java code 
+name: ci pipeline to build java code and code quality by using sonarqube 
 on:
    push:
      branches: master
@@ -23,6 +23,13 @@ jobs:
          run:  mvn package
        - name: verify war file 
          run:  ls -lh target/
+       - name: Sonarqube Scan
+         run: |
+           mvn clean verify sonar:sonar \
+             -Dsonar.projectkey=vcube154-train-book \
+             -Dsonar.host.url="${{secrets.SONAR_HOST_URL}}" \
+             -Dsonar.login="${{secrets.SONAR_TOKEN}}"
+         
 
    
 
