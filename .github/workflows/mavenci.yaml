@@ -23,15 +23,12 @@ jobs:
          run:  mvn package
        - name: verify war file 
          run:  ls -lh target/
-       - name: SonarQube scan
-         uses: SonarSource/sonarqube-scan-action@v6
-         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-         with:
-          args: >
-            -Dsonar.projectKey=vcube154-train-book
-            -Dsonar.projectName=vcube154-train-book
+       - name: Deploy WAR to Tomcat
+        run: |
+          curl -v \
+            -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
+            -T target/TrainBook-1.0.0-SNAPSHOT.war \
+            "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
 
          
 
