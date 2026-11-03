@@ -1,39 +1,69 @@
-name: ci pipeline to build java code and code quality by using sonarqube 
+
+name: CI/CD Pipeline with Nexus
+
 on:
-   push:
-     branches: master
+  push:
+    branches:
+      - master
+
 jobs:
+
   build:
-     runs-on: ubuntu-latest
-     steps:
-       - name: checkout code
-         uses: actions/checkout@v5
-       - name: set-up jdk
-         uses: actions/setup-java@v5
-         with:
-            distribution: 'temurin'
-            java-version: '17'
-       - name: validate with maven 
-         run:  mvn validate
-       - name: compile with maven 
-         run:  mvn compile 
-       - name: test with maven 
-         run:  mvn test
-       - name: package with maven 
-         run:  mvn package
-       - name: verify war file 
-         run:  ls -lh target/
-     
 
-         
+    runs-on: ubuntu-latest
 
-   
+    steps:
 
-       
+      # 1. Checkout Source Code
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
+      # 2. Setup Java 17
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
 
+      # 3. Validate
+      - name: Validate
+        run: mvn validate
 
+      # 4. Compile
+      - name: Compile
+        run: mvn compile
 
-          
-         
-       
+      # 5. Test
+      - name: Test
+        run: mvn test
+
+      # 6. Package
+      - name: Package
+        run: mvn package -DskipTests
+
+      # 7. Configure Maven Credentials for Nexus
+      - name: Configure Maven Settings
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mkdir -p ~/.m2
+
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${NEXUS_USERNAME}</username>
+                <password>${NEXUS_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      # 8. Deploy Artifact to Nexus
+      - name: Deploy to Nexus
+        run: |
+          mvn deploy -DskipTests \
+            -DaltDeploymentRepository=nexus::http://54.252.155.23:8081/repository/maven-snapshots/
