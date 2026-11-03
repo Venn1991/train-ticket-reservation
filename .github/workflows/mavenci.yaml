@@ -23,15 +23,7 @@ jobs:
          run:  mvn package
        - name: verify war file 
          run:  ls -lh target/
-       - name: SonarQube scan
-         uses: SonarSource/sonarqube-scan-action@v6
-         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-         with:
-          args: >
-            -Dsonar.projectKey=vcube154-train-book
-            -Dsonar.projectName=vcube154-train-book
+     
 
          
 
