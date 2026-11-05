@@ -4,22 +4,22 @@ on:
       branches: master
 jobs:
   build:
-     runs-on: ubuntu-latest
-     steps:
-       - name: checkoutout code
-         uses: action/checkout@v5
-       - name: set-up jdk
-         uses: actions/setup-java@v5
-         with:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkoutout code
+        uses: action/checkout@v5
+      - name: set-up jdk
+        uses: actions/setup-java@v5
+        with:
             distribution: 'temurin'
             java-version: '17'
-        - name: validate with maven
-          run: mvn validate
-        - name: compile with maven
-          run: mvn compile
-        - name: test with maven
-          run: mvn test
-        - name: package with maven
-          run: mvn package
-        - name: verify war file
-          run: ls -lh target/ 
+      - name: validate with maven
+        run: mvn validate
+      - name: compile with maven
+        run: mvn compile
+      - name: test with maven
+        run: mvn test
+      - name: package with maven
+        run: mvn package
+      - name: verify war file
+        run: ls -lh target/ 
