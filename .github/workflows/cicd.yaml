@@ -5,62 +5,42 @@ on:
     branches:
       - master
   workflow_dispatch:
-    
-jobs:
 
-  #JOB 1 - BUILD
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
 
-      - name: Validate with Maven
-        run: mvn validate
-
-      - name: Compile with Maven
-        run: mvn compile
-
-      - name: Test with Maven
-        run: mvn test
-
-      - name: Package with Maven
-        run: mvn clean package -DskipTests
+      - name: Validate, Compile, Test, Package
+        run: mvn -B clean package
 
       - name: Prepare WAR
         run: |
           mkdir -p deploy
-          WAR_FILE=$ (find target -maxdepth 1 -name "*.war" -print -quit)
-          if [ -z "$WAR_FILE" ]; then
-            echo "ERROR: WAR file not found"
-            exit 1
-          fi
-          cp "$WAR_FILE" deploy/train-booking.war
+          cp target/*.war deploy/train-booking.war
           ls -lh deploy/
-          
 
-      - name: Upload WAR artifact
+      - name: Upload WAR
         uses: actions/upload-artifact@v4
         with:
           name: train-booking-war
           path: deploy/train-booking.war
-          if-no-files-found: error
 
-  # JOB 2 -DEV
+  #JOB 2 - DEV
   deploy-dev:
     name: Deploy DEV
     needs: build
     runs-on: ubuntu-latest
     environment: DEV
-
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -69,29 +49,27 @@ jobs:
           path: deploy
 
       - name: Deploy to DEV Tomcat
-        env: 
-          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
-          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        env:
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
         run: |
           set -e
           test -n "$TOMCAT_HOST" || exit 1
           test -n "$TOMCAT_USER" || exit 1
           test -n "$TOMCAT_PASSWORD" || exit 1
-
           curl --fail --show-error \
             -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
             -T deploy/train-booking.war \
-"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+            "${TOMCAT_HOST}/manager/text/deploy?path=/TrainBook-DEV&update=true"
 
-  # JOB 3 -TEST
-deploy-test:
+  #JOB 3 - TEST
+  deploy-test:
     name: Deploy TEST
-    needs: build
+    needs: deploy-dev
     runs-on: ubuntu-latest
     environment: TEST
-
-    steps: 
+    steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
         with:
@@ -99,28 +77,26 @@ deploy-test:
           path: deploy
 
       - name: Deploy to TEST Tomcat
-        env: 
-          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
-          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        env:
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
         run: |
           set -e
           test -n "$TOMCAT_HOST" || exit 1
           test -n "$TOMCAT_USER" || exit 1
           test -n "$TOMCAT_PASSWORD" || exit 1
-
           curl --fail --show-error \
             -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
             -T deploy/train-booking.war \
-"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+            "${TOMCAT_HOST}/manager/text/deploy?path=/TrainBook-TEST&update=true"
 
-#JOB 4 -PRE-PROD
-deploY-preprod:
+  #JOB 4 - PRE-PROD
+  deploy-preprod:
     name: Deploy PreProd
-    needs: build
+    needs: deploy-test
     runs-on: ubuntu-latest
     environment: PRE-PROD
-
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -129,28 +105,26 @@ deploY-preprod:
           path: deploy
 
       - name: Deploy to PRE-PROD Tomcat
-        env: 
-          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
-          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        env:
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
         run: |
           set -e
           test -n "$TOMCAT_HOST" || exit 1
           test -n "$TOMCAT_USER" || exit 1
           test -n "$TOMCAT_PASSWORD" || exit 1
-
           curl --fail --show-error \
             -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
             -T deploy/train-booking.war \
-"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+            "${TOMCAT_HOST}/manager/text/deploy?path=/TrainBook-PREPROD&update=true"
 
-#JOB 5 -DEV
-deploy-prod:
+  #JOB 5 - PROD
+  deploy-prod:
     name: Deploy PROD
-    needs: build
+    needs: deploy-preprod
     runs-on: ubuntu-latest
     environment: PROD
-
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -159,17 +133,17 @@ deploy-prod:
           path: deploy
 
       - name: Deploy to PROD Tomcat
-        env: 
-          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
-          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        env:
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
         run: |
           set -e
           test -n "$TOMCAT_HOST" || exit 1
           test -n "$TOMCAT_USER" || exit 1
           test -n "$TOMCAT_PASSWORD" || exit 1
-
           curl --fail --show-error \
             -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
             -T deploy/train-booking.war \
-"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+            "${TOMCAT_HOST}/manager/text/deploy?path=/TrainBook&update=true"
+        
