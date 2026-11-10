@@ -1,115 +1,175 @@
-name: CI/CD Pipeline
+name: CI-CD Pipeline
 
 on:
   push:
     branches:
-      - master   # deploy only when code is pushed to master
-   paths-ignore:
-      - 'README.md'
+      - master
+  workflow_dispatch:
+    
 jobs:
+
+  #JOB 1 - BUILD
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # 2. Set up Java
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: maven
 
-      # 3. Build WAR with Maven
-      - name: Validate
+      - name: Validate with Maven
         run: mvn validate
-      - name: Compile
+
+      - name: Compile with Maven
         run: mvn compile
-      - name: Test
+
+      - name: Test with Maven
         run: mvn test
-      - name: Package
-        run: mvn package
 
-      # 4. Verify WAR file
-      - name: Verify WAR file
-        run: ls -lh target/
+      - name: Package with Maven
+        run: mvn clean package -DskipTests
 
-      # 5. Upload artifact
-      - name: Upload WAR
+      - name: Prepare WAR
+        run: |
+          mkdir -p deploy
+          WAR_FILE=$ (find target -maxdepth 1 -name "*.war" -print -quit)
+          if [ -z "$WAR_FILE" ]; then
+            echo "ERROR: WAR file not found"
+            exit 1
+          fi
+          cp "$WAR_FILE" deploy/train-booking.war
+          ls -lh deploy/
+          
+
+      - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: application-war
-          path: target/*.war
+          name: train-booking-war
+          path: deploy/train-booking.war
+          if-no-files-found: error
 
-  # Deploy DEV
+  # JOB 2 -DEV
   deploy-dev:
     name: Deploy DEV
     needs: build
     runs-on: ubuntu-latest
-    environment: dev  # add required reviewers in GitHub → Settings → Environments
+    environment: DEV
+
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat DEV
-        run: |
-          curl -v -u ${{ secrets.DEV_TOMCAT_USER }}:${{ secrets.DEV_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.DEV_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: train-booking-war
+          path: deploy
 
-  # Deploy QA
-  deploy-qa:
-    name: Deploy QA
+      - name: Deploy to DEV Tomcat
+        env: 
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        run: |
+          set -e
+          test -n "$TOMCAT_HOST" || exit 1
+          test -n "$TOMCAT_USER" || exit 1
+          test -n "$TOMCAT_PASSWORD" || exit 1
+
+          curl --fail --show-error \
+            -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            -T deploy/train-booking.war \
+"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+
+  # JOB 3 -TEST
+deploy-test:
+    name: Deploy TEST
     needs: build
     runs-on: ubuntu-latest
-    environment: qa   # add required reviewers in GitHub → Settings → Environments
-    steps:
+    environment: TEST
+
+    steps: 
       - name: Download WAR
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat QA
-        run: |
-          curl -v -u ${{ secrets.QA_TOMCAT_USER }}:${{ secrets.QA_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.QA_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: train-booking-war
+          path: deploy
 
-  # Deploy PrePROD
-  deploy-preprod:
-    name: Deploy PrePROD
+      - name: Deploy to TEST Tomcat
+        env: 
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        run: |
+          set -e
+          test -n "$TOMCAT_HOST" || exit 1
+          test -n "$TOMCAT_USER" || exit 1
+          test -n "$TOMCAT_PASSWORD" || exit 1
+
+          curl --fail --show-error \
+            -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            -T deploy/train-booking.war \
+"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+
+#JOB 4 -PRE-PROD
+deploY-preprod:
+    name: Deploy PreProd
     needs: build
     runs-on: ubuntu-latest
-    environment: preprod  # add required reviewers in GitHub → Settings → Environments
+    environment: PRE-PROD
+
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat PrePROD
-        run: |
-          curl -v -u ${{ secrets.PREPROD_TOMCAT_USER }}:${{ secrets.PREPROD_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.PREPROD_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: train-booking-war
+          path: deploy
 
-  # Deploy PROD
-  deploy-prod:
+      - name: Deploy to PRE-PROD Tomcat
+        env: 
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
+        run: |
+          set -e
+          test -n "$TOMCAT_HOST" || exit 1
+          test -n "$TOMCAT_USER" || exit 1
+          test -n "$TOMCAT_PASSWORD" || exit 1
+
+          curl --fail --show-error \
+            -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            -T deploy/train-booking.war \
+"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
+
+#JOB 5 -DEV
+deploy-prod:
     name: Deploy PROD
     needs: build
     runs-on: ubuntu-latest
-    environment: prod   # add required reviewers in GitHub → Settings → Environments
+    environment: PROD
+
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat PROD
+          name: train-booking-war
+          path: deploy
+
+      - name: Deploy to PROD Tomcat
+        env: 
+          TOMCAT_HOST: ${{ secrets.TOMCAT_HOST}}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER}}
+          TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD}}
         run: |
-          curl -v -u ${{ secrets.PROD_TOMCAT_USER }}:${{ secrets.PROD_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.PROD_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          set -e
+          test -n "$TOMCAT_HOST" || exit 1
+          test -n "$TOMCAT_USER" || exit 1
+          test -n "$TOMCAT_PASSWORD" || exit 1
+
+          curl --fail --show-error \
+            -u "$TOMCAT_USER:$TOMCAT_PASSWORD" \
+            -T deploy/train-booking.war \
+"${TOMCAT_HOST%/}/manager/text/deploy?path=/TrainBook&update=true"
