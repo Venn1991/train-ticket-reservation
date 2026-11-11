@@ -40,7 +40,6 @@ jobs:
     name: Deploy DEV
     needs: build
     runs-on: ubuntu-latest
-    environment: DEV
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -68,7 +67,6 @@ jobs:
     name: Deploy TEST
     needs: deploy-dev
     runs-on: ubuntu-latest
-    environment: TEST
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -96,7 +94,6 @@ jobs:
     name: Deploy PreProd
     needs: deploy-test
     runs-on: ubuntu-latest
-    environment: PRE-PROD
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
@@ -124,7 +121,6 @@ jobs:
     name: Deploy PROD
     needs: deploy-preprod
     runs-on: ubuntu-latest
-    environment: PROD
     steps:
       - name: Download WAR
         uses: actions/download-artifact@v4
