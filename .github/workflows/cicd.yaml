@@ -74,9 +74,9 @@ jobs:
           path: ./artifact
       - name: Deploy to Tomcat TEST
         run: |
-          curl -v -u ${{ secrets.QA_TOMCAT_USER }}:${{ secrets.QA_TOMCAT_PASSWORD }} \
+          curl -v -u ${{ secrets.TEST_TOMCAT_USER }}:${{ secrets.TEST_TOMCAT_PASSWORD }} \
           -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.QA_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          "http://${{ secrets.TEST_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
 
   # Deploy PrePROD
   deploy-preprod:
