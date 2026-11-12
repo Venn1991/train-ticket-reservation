@@ -1,10 +1,9 @@
-name: CI/CD Pipeline                                                              
-
+name: CI/CD Pipeline
 "on":
   push:
     branches:
-      - master   # deploy only when code is pushed to master
-   paths-ignore:
+      - master  # deploy only when code is pushed to master
+    paths-ignore:
       - 'README.md'
 jobs:
   build:
