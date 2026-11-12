@@ -1,6 +1,6 @@
 name: CI/CD Pipeline                                                              
 
-on:
+"on":
   push:
     branches:
       - master   # deploy only when code is pushed to master
