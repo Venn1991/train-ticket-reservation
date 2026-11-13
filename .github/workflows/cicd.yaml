@@ -8,7 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  # BUILD STAGE
   build:
+    name: Build Maven Project
     runs-on: ubuntu-latest
 
     steps:
@@ -25,16 +28,27 @@ jobs:
       - name: Build and Test with Maven
         run: mvn clean verify
 
+      - name: Verify WAR file
+        run: |
+          ls -lh target/*.war
+
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: war-file
           path: target/*.war
           if-no-files-found: error
+          retention-days: 5
 
+  # DEV DEPLOYMENT STAGE
   deploy-dev:
+    name: Deploy to DEV
     needs: build
     runs-on: ubuntu-latest
+
+    # Connect GitHub DEV environment
+    environment:
+      name: DEV
 
     steps:
       - name: Download WAR artifact
@@ -43,19 +57,36 @@ jobs:
           name: war-file
           path: ./deploy
 
-      - name: Deploy to DEV
+      - name: Check Tomcat Secrets
         env:
           TOMCAT_URL: ${{ secrets.TOMCAT_URL_DEV }}
           TOMCAT_USER: ${{ secrets.TOMCAT_USER_DEV }}
           TOMCAT_PASS: ${{ secrets.TOMCAT_PASS_DEV }}
-
         run: |
-          set -e
-
-          if [ -z "$TOMCAT_URL" ] || [ -z "$TOMCAT_USER" ] || [ -z "$TOMCAT_PASS" ]; then
-            echo "ERROR: Tomcat secrets are missing"
+          if [ -z "$TOMCAT_URL" ]; then
+            echo "ERROR: TOMCAT_URL_DEV is missing"
             exit 1
           fi
+
+          if [ -z "$TOMCAT_USER" ]; then
+            echo "ERROR: TOMCAT_USER_DEV is missing"
+            exit 1
+          fi
+
+          if [ -z "$TOMCAT_PASS" ]; then
+            echo "ERROR: TOMCAT_PASS_DEV is missing"
+            exit 1
+          fi
+
+          echo "All DEV Tomcat secrets are configured"
+
+      - name: Deploy WAR to DEV Tomcat
+        env:
+          TOMCAT_URL: ${{ secrets.TOMCAT_URL_DEV }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER_DEV }}
+          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS_DEV }}
+        run: |
+          set -e
 
           WAR_FILE=$(find ./deploy -maxdepth 1 -name "*.war" -print -quit)
 
@@ -69,6 +100,8 @@ jobs:
           echo "Deploying $WAR_FILE to DEV"
 
           curl --fail --show-error \
-            -u "$TOMCAT_USER:$TOMCAT_PASS" \
-            -T "$WAR_FILE" \
+            --user "$TOMCAT_USER:$TOMCAT_PASS" \
+            --upload-file "$WAR_FILE" \
             "$URL/deploy?path=/train-ticket-reservation&update=true"
+
+          echo "DEV deployment completed successfully"
