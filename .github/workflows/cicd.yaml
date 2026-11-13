@@ -1,114 +1,116 @@
-name: CI/CD Pipeline
-"on":
+name: Build and Deploy train-ticket-reservation
+
+on:
   push:
     branches:
-      - master  # deploy only when code is pushed to master
-    paths-ignore:
-      - 'README.md'
+      - main
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Set up Java
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: '17'
-          distribution: 'temurin'
 
-      # 3. Build WAR with Maven
-      - name: Validate
-        run: mvn validate
-      - name: Compile
-        run: mvn compile
-      - name: Test
-        run: mvn test
-      - name: Package
-        run: mvn package
+      - name: Build & Test with Maven
+        run: mvn clean verify
 
-      # 4. Verify WAR file
-      - name: Verify WAR file
-        run: ls -lh target/
-
-      # 5. Upload artifact
-      - name: Upload WAR
+      - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: application-war
+          name: war-file
           path: target/*.war
 
-  # Deploy DEV
+
   deploy-dev:
-    name: Deploy DEV
     needs: build
     runs-on: ubuntu-latest
-    environment: dev  # add required reviewers in GitHub → Settings → Environments
+
     steps:
-      - name: Download WAR
+      - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat DEV
-        run: |
-          curl -v -u ${{ secrets.DEV_TOMCAT_USER }}:${{ secrets.DEV_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.DEV_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: war-file
 
-  # Deploy TEST
+      - name: Deploy to DEV
+        env:
+          URL: ${{ secrets.TOMCAT_URL_DEV }}
+          USER: ${{ secrets.TOMCAT_USER_DEV }}
+          PASS: ${{ secrets.TOMCAT_PASS_DEV }}
+        run: |
+          WAR_FILE=$(ls *.war | head -n 1)
+          echo "Deploying $WAR_FILE to DEV ($URL)"
+          curl -u "$USER:$PASS" --fail -T "$WAR_FILE" \
+            "$URL/deploy?path=/train-ticket-reservation&update=true"
+
   deploy-test:
-    name: Deploy TEST
     needs: build
     runs-on: ubuntu-latest
-    environment: test   # add required reviewers in GitHub → Settings → Environments
+
     steps:
-      - name: Download WAR
+      - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat TEST
-        run: |
-          curl -v -u ${{ secrets.TEST_TOMCAT_USER }}:${{ secrets.TEST_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.TEST_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: war-file
 
-  # Deploy PrePROD
-  deploy-preprod:
-    name: Deploy PrePROD
+      - name: Deploy to DEV
+        env:
+          URL: ${{ secrets.TOMCAT_URL_TEST }}
+          USER: ${{ secrets.TOMCAT_USER_TEST }}
+          PASS: ${{ secrets.TOMCAT_PASS_TEST }}
+        run: |
+          WAR_FILE=$(ls *.war | head -n 1)
+          echo "Deploying $WAR_FILE to TEST ($URL)"
+          curl -u "$USER:$PASS" --fail -T "$WAR_FILE" \
+            "$URL/deploy?path=/train-ticket-reservation&update=true"
+
+  deploy-pre-prod:
     needs: build
     runs-on: ubuntu-latest
-    environment: preprod  # add required reviewers in GitHub → Settings → Environments
+
     steps:
-      - name: Download WAR
+      - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat PrePROD
-        run: |
-          curl -v -u ${{ secrets.PREPROD_TOMCAT_USER }}:${{ secrets.PREPROD_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.PREPROD_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          name: war-file
 
-  # Deploy PROD
+      - name: Deploy to PRE-PROD
+        env:
+          URL: ${{ secrets.TOMCAT_URL_PRE_PROD }}
+          USER: ${{ secrets.TOMCAT_USER_PRE_PROD }}
+          PASS: ${{ secrets.TOMCAT_PASS_PRE_PROD }}
+        run: |
+          WAR_FILE=$(ls *.war | head -n 1)
+          echo "Deploying $WAR_FILE to PRE-PROD ($URL)"
+          curl -u "$USER:$PASS" --fail -T "$WAR_FILE" \
+            "$URL/deploy?path=/train-ticket-reservation&update=true"
+
   deploy-prod:
-    name: Deploy PROD
     needs: build
     runs-on: ubuntu-latest
-    environment: prod   # add required reviewers in GitHub → Settings → Environments
+
     steps:
-      - name: Download WAR
+      - name: Download WAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: application-war
-          path: ./artifact
-      - name: Deploy to Tomcat PROD
+          name: war-file
+
+      - name: Deploy to PROD
+        env:
+          URL: ${{ secrets.TOMCAT_URL_PROD }}
+          USER: ${{ secrets.TOMCAT_USER_PROD }}
+          PASS: ${{ secrets.TOMCAT_PASS_PROD }}
         run: |
-          curl -v -u ${{ secrets.PROD_TOMCAT_USER }}:${{ secrets.PROD_TOMCAT_PASSWORD }} \
-          -T ./artifact/TrainBook-1.0.0-SNAPSHOT.war \
-          "http://${{ secrets.PROD_TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+          WAR_FILE=$(ls *.war | head -n 1)
+          echo "Deploying $WAR_FILE to PROD ($URL)"
+          curl -u "$USER:$PASS" --fail -T "$WAR_FILE" \
+            "$URL/deploy?path=/train-ticket-reservation&update=true"
+        
