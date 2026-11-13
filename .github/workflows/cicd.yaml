@@ -1,4 +1,6 @@
+
 name: Build and Deploy train-ticket-reservation
+
 on:
   push:
     branches:
@@ -18,8 +20,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: maven
 
-      - name: Build & Test with Maven
+      - name: Build and Test with Maven
         run: mvn clean verify
 
       - name: Upload WAR artifact
@@ -27,7 +30,7 @@ jobs:
         with:
           name: war-file
           path: target/*.war
-
+          if-no-files-found: error
 
   deploy-dev:
     needs: build
@@ -38,17 +41,34 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: war-file
+          path: ./deploy
 
       - name: Deploy to DEV
         env:
-          URL: ${{ secrets.TOMCAT_URL_DEV }}
-          USER: ${{ secrets.TOMCAT_USER_DEV }}
-          PASS: ${{ secrets.TOMCAT_PASS_DEV }}
-        run: |
-          WAR_FILE=$(ls *.war | head -n 1)
-          echo "Deploying $WAR_FILE to DEV ($URL)"
-          curl -u "$USER:$PASS" --fail -T "$WAR_FILE" \
-            "$URL/deploy?path=/train-ticket-reservation&update=true"
+          TOMCAT_URL: ${{ secrets.TOMCAT_URL_DEV }}
+          TOMCAT_USER: ${{ secrets.TOMCAT_USER_DEV }}
+          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS_DEV }}
 
-  
-        
+        run: |
+          set -e
+
+          if [ -z "$TOMCAT_URL" ] || [ -z "$TOMCAT_USER" ] || [ -z "$TOMCAT_PASS" ]; then
+            echo "ERROR: Tomcat secrets are missing"
+            exit 1
+          fi
+
+          WAR_FILE=$(find ./deploy -maxdepth 1 -name "*.war" -print -quit)
+
+          if [ -z "$WAR_FILE" ]; then
+            echo "ERROR: WAR file not found"
+            exit 1
+          fi
+
+          URL="${TOMCAT_URL%/}"
+
+          echo "Deploying $WAR_FILE to DEV"
+
+          curl --fail --show-error \
+            -u "$TOMCAT_USER:$TOMCAT_PASS" \
+            -T "$WAR_FILE" \
+            "$URL/deploy?path=/train-ticket-reservation&update=true"
